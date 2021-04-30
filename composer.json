@@ -1,0 +1,46 @@
+{
+  "name": "zazimou/wsdl-to-php",
+  "type": "library",
+  "description": "PHP library for creating Soap clients and type objects from WSDL",
+  "license": "GPL-3.0",
+  "require": {
+    "php": ">=7.4",
+    "ext-curl": "*",
+    "ext-mbstring": "*",
+    "php-curl-class/php-curl-class": "^8.6",
+    "besimple/soap-client": "^0.2.6",
+    "ext-soap": "*",
+    "nette/php-generator": "^3.3",
+    "ext-dom": "*"
+  },
+  "require-dev": {
+    "nette/tester": "~2.0",
+    "nette/bootstrap": "~3.0",
+    "nette/robot-loader": "~3.0",
+    "ninjify/nunjuck": "~0.3"
+  },
+  "authors": [
+    {
+    "name": "Jiří Zima",
+    "email": "info@zazimou.cz"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "Zazimou\\WsdlToPhp\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Zazimou\\WsdlToPhp\\Tests\\": "tests"
+    }
+  },
+  "config": {
+    "platform": {
+      "php": "7.4"
+    }
+  },
+  "prefer-stable": true,
+  "minimum-stability": "dev"
+
+}
