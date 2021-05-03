@@ -7,6 +7,7 @@ namespace Zazimou\WsdlToPhp\PhpGenerators;
 use Nette\PhpGenerator\PhpFile;
 use Nette\PhpGenerator\Property;
 use Nette\Utils\Strings;
+use ReflectionMethod;
 use Zazimou\WsdlToPhp\Exceptions\UnexpectedValueException;
 use Zazimou\WsdlToPhp\Options\GeneratorOptions;
 use Zazimou\WsdlToPhp\Printer;
@@ -86,7 +87,7 @@ class BasePhpGenerator
 
     protected function normalizePropertyDocComment(Element $element): ?string
     {
-        if ($element->type == 'base64Binary') {
+        if ($element->type === 'base64Binary') {
             return 'Contains base64Binary string';
         }
 
@@ -97,7 +98,7 @@ class BasePhpGenerator
      * @param Element $element
      * @return string
      */
-    private function normalizePropertyType(Element $element): string
+    protected function normalizePropertyType(Element $element): string
     {
         $type = $element->type;
         if ($type == 'dateTime') {
@@ -112,7 +113,7 @@ class BasePhpGenerator
         if ($element->arrayable) {
             $type = $type.'[]';
         }
-        if ($element->nullable && (float)$this->options->phpVersion < 7.4) {
+        if ($element->nullable) {
             $type = $type.'|null';
         }
 
@@ -137,5 +138,48 @@ class BasePhpGenerator
                 $property->setType($this->namespace.'\\'.$this->normalizePropertyType($element));
             }
         }
+    }
+
+    public static function getVisibilityFromReflection(ReflectionMethod $reflection): string
+    {
+        if ($reflection->isPublic() === true) {
+            return 'public';
+        }
+        if ($reflection->isProtected() === true) {
+            return 'protected';
+        }
+        if ($reflection->isPrivate() === true) {
+            return 'private';
+        }
+
+        return 'public';
+    }
+
+    /**
+     * @param ReflectionMethod $method
+     * @return string
+     */
+    protected function getMethodBody(ReflectionMethod $method): string
+    {
+        $fileName = $method->getFileName();
+        $startLine = $method->getStartLine() + 1;
+        $endLine = $method->getEndLine() - 1;
+
+        $source = file($fileName);
+        $source = implode('', array_slice($source, 0, count($source)));
+        $source = preg_split("/".PHP_EOL."/", $source);
+
+        $body = '';
+        for ($i = $startLine; $i < $endLine; $i++) {
+            $beforeSubstr = "{$source[$i]}\n";
+            $length = Strings::length($beforeSubstr);
+            $afterSubstr = mb_substr($beforeSubstr, 4, $length - 4);
+            if ($afterSubstr == '') {
+                $afterSubstr = "\n";
+            }
+            $body .= ($afterSubstr);
+        }
+
+        return $body;
     }
 }

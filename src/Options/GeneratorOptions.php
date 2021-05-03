@@ -37,9 +37,5 @@ class GeneratorOptions
      * Version of PHP for type declaration. If you write 7.4 - Library generates fully typed objects for PHP 7.4
      */
     public $phpVersion = '7.3';
-    /** @var bool
-     * If is this true, than all types properties are normalized (first character lowed, etc.)
-     */
-    public $normalizeNames = true;
 
 }

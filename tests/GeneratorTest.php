@@ -18,7 +18,6 @@ class GeneratorTest extends TestCase
         $options = new GeneratorOptions;
         $options->namespace = 'Zazimou\Test\Soap';
         $options->soapClientClassName = 'TestSoap';
-        $options->normalizeNames = false;
         Generator::fromUrl('http://www.thomas-bayer.com/axis2/services/BLZService?wsdl', $options);
     }
 

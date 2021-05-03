@@ -8,6 +8,7 @@ use ReflectionException;
 use Zazimou\WsdlToPhp\Exceptions\CurlException;
 use Zazimou\WsdlToPhp\Exceptions\UnexpectedValueException;
 use Zazimou\WsdlToPhp\Options\GeneratorOptions;
+use Zazimou\WsdlToPhp\PhpGenerators\BaseTypeGenerator;
 use Zazimou\WsdlToPhp\PhpGenerators\SoapClassGenerator;
 use Zazimou\WsdlToPhp\PhpGenerators\TypeGenerator;
 
@@ -52,11 +53,13 @@ class Generator
      */
     private function generateFiles(): void
     {
+        $baseTypeGenerator = new BaseTypeGenerator($this->options);
         $typesGenerator = new TypeGenerator($this->options, $this->exctractor->types);
         $soapClassGenerator = new SoapClassGenerator($this->options);
+        $baseTypeGenerator->createClass();
         foreach ($this->exctractor->types->types as $type) {
             $typesGenerator->createClass($type);
         }
-        $soapClassGenerator->createClass($this->exctractor->methods, $this->exctractor->defaultSoapClientName, $typesGenerator->classmap, $typesGenerator->renamedProperties, $typesGenerator->namespace, $this->exctractor->elements);
+        $soapClassGenerator->createClass($this->exctractor->methods, $this->exctractor->defaultSoapClientName, $typesGenerator->classmap, $typesGenerator->namespace, $this->exctractor->elements);
     }
 }

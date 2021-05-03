@@ -17,7 +17,6 @@ use Zazimou\WsdlToPhp\Exceptions\UnexpectedValueException;
 use Zazimou\WsdlToPhp\Helpers\GeneratorHelper;
 use Zazimou\WsdlToPhp\Options\GeneratorOptions;
 use Zazimou\WsdlToPhp\Patterns\SoapClientPattern;
-use Zazimou\WsdlToPhp\Types\Generator\RenamedProperties;
 use Zazimou\WsdlToPhp\Types\Wsdl\Element;
 use Zazimou\WsdlToPhp\Types\Wsdl\Elements;
 use Zazimou\WsdlToPhp\Types\Wsdl\PortType;
@@ -38,13 +37,12 @@ class SoapClassGenerator extends BasePhpGenerator
      * @param PortTypes         $portTypes
      * @param string            $defaultClassName
      * @param array             $classmap
-     * @param RenamedProperties $renamedProperties
      * @param string            $typesNamespace
      * @param Elements          $elements
      * @throws ReflectionException
      * @throws UnexpectedValueException
      */
-    public function createClass(PortTypes $portTypes, string $defaultClassName, array $classmap, RenamedProperties $renamedProperties, string $typesNamespace, Elements $elements): void
+    public function createClass(PortTypes $portTypes, string $defaultClassName, array $classmap, string $typesNamespace, Elements $elements): void
     {
         $phpFile = $this->createFile();
         $className = $this->validateClassName($defaultClassName);
@@ -56,12 +54,6 @@ class SoapClassGenerator extends BasePhpGenerator
         $phpNamespace->add($class);
         $class->setExtends($this->options->soapClientExtender);
         $properies = [];
-        $elementRenamedProperies = new Element('renamedProperties', 'string');
-        $elementRenamedProperies->arrayable = true;
-        $propertyRenamedProperties = new Property('renamedProperties');
-        $propertyRenamedProperties->setStatic();
-        $this->resolvePropertyTypeByPhpVersion($propertyRenamedProperties, $elementRenamedProperies);
-        $properies[] = $propertyRenamedProperties;
         $elementClassmap = new Element('classmap', 'string');
         $elementClassmap->arrayable = true;
         $propertyClassMap = new Property('classmap');
@@ -115,31 +107,10 @@ class SoapClassGenerator extends BasePhpGenerator
         }
         sort($mapValues);
         $methods[] = $this->addMethodWithArrayBody('loadClassMap', $mapValues);
-        $renamedValues = [];
-        foreach ($renamedProperties->properties as $key => $value) {
-            $renamedValues[$value->renamed] = '    "'.$value->renamed.'" => "'.$value->original.'"';
-        }
-        sort($renamedValues);
-        $methods[] = $this->addMethodWithArrayBody('loadRenamedProperties', $renamedValues);
         $class->setMethods($methods);
         $class->setProperties($properies);
 
         $this->printClass($className, $phpFile);
-    }
-
-    public static function getVisibilityFromReflection(ReflectionMethod $reflection): string
-    {
-        if ($reflection->isPublic() === true) {
-            return 'public';
-        }
-        if ($reflection->isProtected() === true) {
-            return 'protected';
-        }
-        if ($reflection->isPrivate() === true) {
-            return 'private';
-        }
-
-        return 'public';
     }
 
     protected function normalizeMethodName(PortType $method): string
@@ -162,37 +133,11 @@ class SoapClassGenerator extends BasePhpGenerator
     {
         $string = implode(",\n", $values);
         $method = new Method($methodName);
+        $method->setReturnType('array');
+        $method->setComment('@return string[]');
         $method->setVisibility('protected')->setStatic()->setBody("return [\n".$string."\n];");
 
         return $method;
-    }
-
-    /**
-     * @param ReflectionMethod $method
-     * @return string
-     */
-    private function getMethodBody(ReflectionMethod $method): string
-    {
-        $fileName = $method->getFileName();
-        $startLine = $method->getStartLine() + 1;
-        $endLine = $method->getEndLine() - 1;
-
-        $source = file($fileName);
-        $source = implode('', array_slice($source, 0, count($source)));
-        $source = preg_split("/".PHP_EOL."/", $source);
-
-        $body = '';
-        for ($i = $startLine; $i < $endLine; $i++) {
-            $beforeSubstr = "{$source[$i]}\n";
-            $length = Strings::length($beforeSubstr);
-            $afterSubstr = mb_substr($beforeSubstr, 4, $length - 4);
-            if ($afterSubstr == '') {
-                $afterSubstr = "\n";
-            }
-            $body .= ($afterSubstr);
-        }
-
-        return $body;
     }
 
     /**
@@ -215,7 +160,6 @@ class SoapClassGenerator extends BasePhpGenerator
             $visibility = self::getVisibilityFromReflection($info);
             $item->setVisibility($visibility);
             $item->setStatic($info->isStatic());
-            //            $item->setReturnType($info->getReturnType());
             $returnType = $info->getReturnType();
             if (!empty($returnType)) {
                 $item->setReturnType($info->getReturnType()->getName());
