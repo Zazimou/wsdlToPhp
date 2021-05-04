@@ -17,6 +17,8 @@ trait BaseTypePattern
                 if (isset($this->{$name}) === false) {
                     if ($this->isArray($match[1])) {
                         $this->{$name} = [];
+                    } else {
+                        $this->{$name} = null;
                     }
                 }
 
