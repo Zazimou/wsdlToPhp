@@ -103,7 +103,7 @@ class SoapClassGenerator extends BasePhpGenerator
         }
         $mapValues = [];
         foreach ($classmap as $key => $value) {
-            $mapValues[$key] = '    "'.$key.'" => "'.$value.'"';
+            $mapValues[$key] = '    \''.$key.'\' => \''.$value.'\'';
         }
         sort($mapValues);
         $methods[] = $this->addMethodWithArrayBody('loadClassMap', $mapValues);
