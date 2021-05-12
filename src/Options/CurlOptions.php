@@ -18,7 +18,26 @@ class CurlOptions
     public function authenticateWithBasic(string $username, string $password = ''): CurlOptions
     {
         $this->options[CURLOPT_HTTPAUTH] = CURLAUTH_BASIC;
-        $this->options[CURLOPT_USERPWD] = $username . ':' . $password;
+        $this->options[CURLOPT_USERPWD] = $username.':'.$password;
+
+        return $this;
+    }
+
+    public function ignoreCertificate(bool $ignore = true): CurlOptions
+    {
+        if ($ignore === true) {
+            $this->options[CURLOPT_SSL_VERIFYHOST] = 0;
+            $this->options[CURLOPT_SSL_VERIFYPEER] = 0;
+        }
+
+        if ($ignore === false) {
+            if (isset($this->options[CURLOPT_SSL_VERIFYHOST])) {
+                unset($this->options[CURLOPT_SSL_VERIFYHOST]);
+            }
+            if (isset($this->options[CURLOPT_SSL_VERIFYPEER])) {
+                unset($this->options[CURLOPT_SSL_VERIFYPEER]);
+            }
+        }
 
         return $this;
     }
