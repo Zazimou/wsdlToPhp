@@ -101,14 +101,17 @@ class BasePhpGenerator
     protected function normalizePropertyType(Element $element): string
     {
         $type = $element->type;
-        if ($type == 'dateTime') {
+        if ($type === 'dateTime') {
             $type = 'DateTime';
         }
-        if ($type == 'base64Binary') {
+        if ($type === 'base64Binary') {
             $type = 'string';
         }
-        if ($type == 'boolean') {
+        if ($type === 'boolean') {
             $type = 'bool';
+        }
+        if ($type === 'decimal') {
+            $type = 'float';
         }
         if ($element->arrayable) {
             $type = $type.'[]';
