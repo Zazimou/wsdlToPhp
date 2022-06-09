@@ -42,6 +42,13 @@ class CurlOptions
         return $this;
     }
 
+    public function setProxy(string $host, int $port): CurlOptions
+    {
+        $this->options[CURLOPT_PROXY] = $host . ':' . $port;
+
+        return $this;
+    }
+
     /**
      * @return array
      */
