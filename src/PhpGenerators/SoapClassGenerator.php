@@ -82,7 +82,6 @@ class SoapClassGenerator extends BasePhpGenerator
             }
             $body = $this->getMethodBody($reflection);
             $body = str_replace('callMethod', $method->name, $body);
-            $newMethod->setBody($body);
             if (isset($method->description)) {
                 $newMethod->addComment($method->description);
             }
@@ -97,8 +96,10 @@ class SoapClassGenerator extends BasePhpGenerator
                     $phpNamespace->addUse($returnTypeNamespace);
                     $newMethod->setReturnType($returnTypeNamespace);
                     $newMethod->addComment('@return '.$returnTypeName);
+                    $body = str_replace('ReturnType', $returnTypeName, $body);
                 }
             }
+            $newMethod->setBody($body);
             $methods[] = clone $newMethod;
         }
         $mapValues = [];
@@ -166,7 +167,7 @@ class SoapClassGenerator extends BasePhpGenerator
                 $item->setReturnNullable($returnType->allowsNull());
             }
             if ($info->getDocComment()) {
-                $item->setComment($info->getDocComment());
+                $item->setComment(GeneratorHelper::cleanupDocComments($info->getDocComment()));
             }
             $params = $info->getParameters();
             $parameters = [];

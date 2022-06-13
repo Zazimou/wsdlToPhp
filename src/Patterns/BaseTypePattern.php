@@ -9,7 +9,11 @@ use ReflectionClass;
 
 trait BaseTypePattern
 {
-    public function __get($name)
+    /**
+     * @param string $name
+     * @return string|array<string|static>|static|int|float|null
+     */
+    public function __get(string $name)
     {
         $matches = $this->findReflectionProperties();
         foreach ($matches as $match) {
@@ -29,7 +33,11 @@ trait BaseTypePattern
         return null;
     }
 
-    public function __set($name, $value)
+    /**
+     * @param string $name
+     * @param string|array<string|static>|static|int|float|null $value
+     */
+    public function __set(string $name, $value): void
     {
         $matches = $this->findReflectionProperties();
         foreach ($matches as $match) {
@@ -53,6 +61,9 @@ trait BaseTypePattern
         return substr($haystack, -$length) === $needle;
     }
 
+    /**
+     * @return string[]
+     */
     private function findReflectionProperties(): array
     {
         $rc = new ReflectionClass($this);

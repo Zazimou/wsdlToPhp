@@ -9,6 +9,10 @@ class SoapClientPattern
     /** @var string[] */
     private static $classmap;
 
+    /**
+     * @param string     $wsdl
+     * @param array<string|int|array<string|int>>|null $options
+     */
     public function __construct(string $wsdl, ?array $options = [])
     {
         self::$classmap = self::loadClassMap();
@@ -18,15 +22,23 @@ class SoapClientPattern
 
     public function callMethod(TypeHint $arguments): ReturnType
     {
-        return $this->__soapCall('callMethod', [$arguments]);
+        /** @var ReturnType $response */
+        $response = $this->__soapCall('callMethod', [$arguments]);
+        return $response;
     }
 
     public function callMethodWithoutRequest(): ReturnType
     {
-        return $this->__soapCall('callMethod', []);
+        /** @var ReturnType $response */
+        $response = $this->__soapCall('callMethod', []);
+        return $response;
     }
 
 
+    /**
+     * @param array<string|int|array<string|int>>|null $options
+     * @return array<string|int|array<string|int>>
+     */
     protected static function normalizeOptions(?array $options): array
     {
         $options['classmap'] = self::$classmap;

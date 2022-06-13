@@ -61,7 +61,7 @@ class BaseTypeGenerator extends BasePhpGenerator
                 $item->setReturnNullable($returnType->allowsNull());
             }
             if ($info->getDocComment()) {
-                $item->setComment($info->getDocComment());
+                $item->setComment(GeneratorHelper::cleanupDocComments($info->getDocComment()));
             }
             $params = $info->getParameters();
             $parameters = [];

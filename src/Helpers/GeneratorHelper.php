@@ -31,4 +31,10 @@ class GeneratorHelper
 
         return TMP_DIR . self::NAMESPACE_SEPARATOR . 'generated' . self::NAMESPACE_SEPARATOR . $path;
     }
+
+    public static function cleanupDocComments(string $docComment): string
+    {
+        $comment = str_replace(['/**', '*/', '* ', '  '], '', $docComment);
+        return str_replace([' @'], '@', $comment);
+    }
 }
