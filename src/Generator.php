@@ -9,6 +9,7 @@ use Zazimou\WsdlToPhp\Exceptions\CurlException;
 use Zazimou\WsdlToPhp\Exceptions\UnexpectedValueException;
 use Zazimou\WsdlToPhp\Options\GeneratorOptions;
 use Zazimou\WsdlToPhp\PhpGenerators\BaseTypeGenerator;
+use Zazimou\WsdlToPhp\PhpGenerators\NoRegenerateInterfaceGenerator;
 use Zazimou\WsdlToPhp\PhpGenerators\SoapClassGenerator;
 use Zazimou\WsdlToPhp\PhpGenerators\TypeGenerator;
 
@@ -57,6 +58,8 @@ class Generator
         $typesGenerator = new TypeGenerator($this->options, $this->exctractor->types);
         $soapClassGenerator = new SoapClassGenerator($this->options);
         $baseTypeGenerator->createClass();
+        $noRegenerate = new NoRegenerateInterfaceGenerator($this->options);
+        $noRegenerate->createClass();
         foreach ($this->exctractor->types->types as $type) {
             $typesGenerator->createClass($type);
         }
