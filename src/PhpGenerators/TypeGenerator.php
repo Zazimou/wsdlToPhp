@@ -6,6 +6,7 @@ namespace Zazimou\WsdlToPhp\PhpGenerators;
 
 use DateTime;
 use Nette\PhpGenerator\ClassType;
+use Nette\PhpGenerator\Constant;
 use Nette\Utils\Strings;
 use Zazimou\WsdlToPhp\Exceptions\UnexpectedValueException;
 use Zazimou\WsdlToPhp\Helpers\GeneratorHelper;
@@ -47,7 +48,8 @@ class TypeGenerator extends BasePhpGenerator
         $phpNamespace = $phpFile->getNamespaces()[$this->namespace];
         $class = $phpNamespace->addClass($type->name);
         $this->classmap[$type->name] = $this->namespace.'\\'.$type->name;
-        $class->addTrait($this->namespace.'\BaseType');
+        $class->addExtend($this->namespace.'\BaseType');
+        $consts = [];
         foreach ($type->elements as $element) {
             if ($element->type === 'dateTime') {
                 $phpNamespace->addUse(DateTime::class);
@@ -61,10 +63,17 @@ class TypeGenerator extends BasePhpGenerator
                 $comments[] = $docComment;
             }
             $class->addComment(sprintf('@property %s $%s %s', $this->normalizePropertyType($element), $this->normalizePropertyName($element), join('| ', $comments)));
+            if ($this->options->generateConstants === true) {
+                $const = new Constant($this->options->constantsPrefix. $this->normalizePropertyName($element));
+                $const->setValue($this->normalizePropertyName($element));
+                $consts[] = $const;
+            }
+
         }
         if (isset($type->extends)) {
             $class->setExtends($this->namespace.'\\'.$type->extends);
         }
+        $class->setConstants($consts);
         $this->printClass($type->name, $phpFile);
     }
 

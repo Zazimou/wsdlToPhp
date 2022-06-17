@@ -49,7 +49,9 @@ class SoapClassGenerator extends BasePhpGenerator
         $phpNamespace = $phpFile->getNamespaces()[$this->namespace];
         $pattern = ClassType::from(SoapClientPattern::class);
         $class = new ClassType($className);
+        $phpNamespace->addUse('SoapHeader');
         $phpNamespace->addUse($typesNamespace);
+        $phpNamespace->addUse($typesNamespace . '\\BaseType');
         $phpNamespace->addUse($this->options->soapClientExtender);
         $phpNamespace->add($class);
         $class->setExtends($this->options->soapClientExtender);
@@ -182,6 +184,9 @@ class SoapClassGenerator extends BasePhpGenerator
                     }
                     if ($param->isDefaultValueAvailable()) {
                         $parameter->setDefaultValue($param->getDefaultValue());
+                    }
+                    if ($param->isPassedByReference()) {
+                        $parameter->setReference();
                     }
                     $parameters[] = $parameter;
                 }

@@ -7,6 +7,7 @@ namespace Zazimou\WsdlToPhp\PhpGenerators;
 use Nette\PhpGenerator\ClassType;
 use Nette\PhpGenerator\Method;
 use Nette\PhpGenerator\Parameter;
+use Nette\PhpGenerator\Property;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionMethod;
@@ -31,13 +32,38 @@ class BaseTypeGenerator extends BasePhpGenerator
         $className = 'BaseType';
         $phpNamespace = $phpFile->getNamespaces()[$this->namespace];
         $class = new ClassType($className);
-        $class->setType('trait');
+        $class->setType('class');
+        $class->setAbstract();
         $phpNamespace->add($class);
         $phpNamespace->addUse('ReflectionClass');
+        $phpNamespace->addUse('DateTime');
+        $props[] = $this->createDataProp();
+        $props[] = $this->createDateFormatsProp();
+        $class->setProperties($props);
         $methods = $this->getPatternMethods();
         $class->setMethods($methods);
 
         $this->printClass($className, $phpFile);
+    }
+
+    private function createDataProp(): Property
+    {
+        $property = new Property('data');
+        $property->setType('array');
+        $property->setValue([]);
+        $property->setPrivate();
+        $property->setComment('@var array<string|array<string|static>|static|int|float|null|bool|DateTime>');
+        return $property;
+    }
+
+    private function createDateFormatsProp(): Property
+    {
+        $property = new Property('dateFormats');
+        $property->setType('array');
+        $property->setValue([]);
+        $property->setPrivate();
+        $property->setComment('@var array<int|string, string>');
+        return $property;
     }
 
     /**
