@@ -14,7 +14,7 @@ class SoapClientPattern
 
     /**
      * @param string                                   $wsdl
-     * @param array<string|int|array<string|int>>|null $options
+     * @param array<string|int|array<string|int>|bool>|null $options
      */
     public function __construct(string $wsdl, ?array $options = [])
     {

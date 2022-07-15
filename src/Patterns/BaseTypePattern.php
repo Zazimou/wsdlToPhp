@@ -50,16 +50,52 @@ class BaseTypePattern
         $matches = $this->findReflectionProperties();
         foreach ($matches as $match) {
             if ($match[2] === $name) {
-                if ($this->isArray($match[1]) && is_array($value) === false) {
-                    $value = [$value];
-                }
-                if (strpos($match[1], 'DateTime') !== false && $value instanceof DateTime === false) {
-                    $value = new DateTime($value);
-                }
-
+                $value = $this->retypeValue($value, $match[1]);
                 $this->data[$name] = $value;
+                break;
             }
         }
+    }
+
+    /**
+     * @param array|bool|DateTime|float|int|string|null       $value
+     * @param string $types
+     * @return array|bool|DateTime|float|int|string|null
+     */
+    private function retypeValue($value, string $types)
+    {
+        $types = $this->getArrayOfTypes($types);
+        foreach ($types as $type) {
+            if ($this->isArray($type)) {
+                return is_array($value) ? $value : [$value];
+            }
+            if ($type === 'string') {
+                return (string) $value;
+            } elseif ($type === 'int') {
+                return (int) $value;
+            } elseif ($type === 'float') {
+                return (float) $value;
+            } elseif ($type === 'bool') {
+                return (bool) $value;
+            } elseif ($type === 'DateTime') {
+                return $value instanceof DateTime ? $value : (is_string($value) ? new DateTime($value) : null);
+            } elseif ($type === 'array') {
+                return is_array($value) ? $value : [];
+            } elseif ($type === 'object') {
+                return is_object($value) ? $value : null;
+            } elseif ($type === 'null') {
+                return $value === null ? null : $value;
+            }else{
+                return $value;
+            }
+        }
+
+        return $value;
+    }
+
+    private function getArrayOfTypes(string $type): array
+    {
+        return explode('|', $type);
     }
 
     private function endsWith(string $haystack, string $needle): bool
@@ -78,12 +114,36 @@ class BaseTypePattern
     private function findReflectionProperties(): array
     {
         $rc = new ReflectionClass($this);
-        preg_match_all(
-            '~^  [ \t*]*  @property(?:|-read)  [ \t]+  ([^\s$]+)  [ \t]+  \$  (\w+)  ()~mx',
-            (string)$rc->getDocComment(), $matches, PREG_SET_ORDER
-        );
+        $comments = $this->findDocComment($rc);
+        $retMatches = [];
+        foreach ($comments as $comment) {
+            preg_match_all(
+                '~^  [ \t*]*  @property(?:|-read)  [ \t]+  ([^\s$]+)  [ \t]+  \$  (\w+)  ()~mx',
+                $comment, $matches, PREG_SET_ORDER
+            );
+            $retMatches = array_merge($retMatches, $matches);
+        }
 
-        return $matches;
+        return $retMatches;
+    }
+
+    /**
+     * @param ReflectionClass<static> $reflection
+     * @param string[]           $comments
+     * @return string[]
+     */
+    private function findDocComment(ReflectionClass $reflection, array $comments = []): array
+    {
+        $comment = $reflection->getDocComment();
+        if ($comment !== false) {
+            $comments[] = $comment;
+        }
+        $parentClass = $reflection->getParentClass();
+        if ($parentClass) {
+            $comments = $comments + $this->findDocComment($parentClass, $comments);
+        }
+
+        return $comments;
     }
 
     private function isArray(string $matchResult): bool
@@ -100,7 +160,7 @@ class BaseTypePattern
 
     /**
      * @internal
-     * @return string|array<string|static>|static|int|float|null
+     * @return array<string|array<string|static>|static|int|float|null>
      */
     public function regenerateSoapArgs(): array
     {
