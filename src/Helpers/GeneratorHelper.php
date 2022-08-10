@@ -18,18 +18,18 @@ class GeneratorHelper
 
     public static function pathFromNamespace(?string $namespace = null): string
     {
-        if ($namespace and mb_substr($namespace, -1) == self::NAMESPACE_SEPARATOR)
+        if ($namespace and mb_substr($namespace, -1) === self::NAMESPACE_SEPARATOR)
         {
             $count = mb_strlen($namespace);
             $namespace = mb_substr($namespace, 0, $count - 1);
         }
-        if ($namespace and mb_substr($namespace, 0) == self::NAMESPACE_SEPARATOR)
+        if ($namespace and mb_substr($namespace, 0) === self::NAMESPACE_SEPARATOR)
         {
             $namespace = mb_substr($namespace, 1);
         }
-        $path = $namespace;
+        $path = str_replace('\\', '/', $namespace);
 
-        return TMP_DIR . self::NAMESPACE_SEPARATOR . 'generated' . self::NAMESPACE_SEPARATOR . $path;
+        return TMP_DIR . '/generated/' . $path;
     }
 
     public static function cleanupDocComments(string $docComment): string

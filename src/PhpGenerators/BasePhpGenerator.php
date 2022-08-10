@@ -54,7 +54,7 @@ class BasePhpGenerator
      */
     public static function generateToFile(string $filePath, string $className, string $content): void
     {
-        self::createDir($filePath, 0666, true);
+        self::createDir($filePath, 0777, true);
         $filename = $filePath.DIRECTORY_SEPARATOR.$className.'.php';
         if (self::containsNoRegenerate($filename)) {
             return;
@@ -147,6 +147,7 @@ class BasePhpGenerator
     protected function normalizePropertyType(Element $element): string
     {
         $type = $element->type;
+        $type = $type === "" ? 'mixed' : $type;
         if ($type === 'dateTime') {
             $type = 'DateTime';
         }
